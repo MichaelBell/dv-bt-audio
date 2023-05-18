@@ -27,6 +27,7 @@ include(common/pimoroni_i2c)
 include(drivers/aps6404/aps6404)
 include(drivers/dv_display/dv_display)
 include(libraries/pico_graphics/pico_graphics)
+include(libraries/jpegdec/jpegdec)
 
 target_include_directories(${NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
@@ -39,6 +40,7 @@ target_link_libraries(${NAME}
     pimoroni_i2c
     dv_display
     pico_graphics
+    jpegdec
 )
 
 target_compile_definitions(${NAME} PRIVATE

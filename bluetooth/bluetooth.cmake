@@ -9,7 +9,8 @@ add_library(picow_bt_example_common INTERFACE)
 target_sources(picow_bt_example_common INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/common.cpp
     ${BTSTACK_ROOT}/src/btstack_audio.c
-)
+    ${BTSTACK_ROOT}/src/classic/avrcp_cover_art_client.c
+    ${BTSTACK_ROOT}/src/hci_event.c)
 
 target_link_libraries(picow_bt_example_common INTERFACE
     pico_stdlib

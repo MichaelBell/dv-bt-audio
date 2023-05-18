@@ -4,6 +4,7 @@
 #include "libraries/pico_graphics/pico_graphics.hpp"
 
 #include "fixed_fft.hpp"
+#include "JPEGDEC.h"
 
 using namespace pimoroni;
 
@@ -26,6 +27,48 @@ static FIX_FFT fft;
 #define MAX_TITLE_LEN 63
 static char title[MAX_TITLE_LEN+1];
 
+static const uint8_t* cover_jpg;
+static uint32_t cover_jpg_len = 0;
+static uint32_t cover_draws_todo = 0;
+static JPEGDEC jpeg;
+
+int jpegdec_draw_callback(JPEGDRAW *draw) {
+  uint16_t *p = draw->pPixels;
+
+    // TODO
+  int xo = 0;
+  int yo = 0;
+
+  for(int y = 0; y < draw->iHeight; y++) {
+    for(int x = 0; x < draw->iWidth; x++) {
+      int sx = draw->x + x + xo;
+      int sy = draw->y + y + yo;
+
+      if(sx >= 0 && sx < graphics.bounds.w && x < draw->iWidthUsed &&
+         sy >= 0 && sy < graphics.bounds.h) {
+        const RGB565 col = *p;
+        graphics.set_pen((col & 0x1F) | ((col & 0xFFC0) >> 1));
+        graphics.pixel({sx, sy});
+      }
+
+      p++;
+    }
+  }
+
+  return 1; // continue drawing
+}
+
+void draw_jpeg() {
+  jpeg.openRAM((uint8_t*)cover_jpg, cover_jpg_len, jpegdec_draw_callback);
+
+  jpeg.setPixelType(RGB565_LITTLE_ENDIAN);
+
+  printf("- starting jpeg decode..");
+  int start = millis();
+  jpeg.decode(160, 358, JPEG_SCALE_HALF);
+  printf("done in %d ms!\n", int(millis() - start));
+}
+
 static void init_screen() {
     graphics.set_pen(0,0,50);
     graphics.clear();
@@ -37,10 +80,10 @@ static void init_screen() {
 
 static void set_title() {
     graphics.set_pen(0,0,50);
-    graphics.rectangle(Rect(160, 400, 400, 50));
+    graphics.rectangle(Rect(280, 400, 400, 50));
     graphics.set_pen(200,200,200);
     graphics.set_font("bitmap8");
-    graphics.text(title, Point(160, 400), 400, 2);
+    graphics.text(title, Point(280, 400), 400, 2);
 }
 
 static void set_clip() {
@@ -73,6 +116,13 @@ static void core1_main() {
             set_title();
             set_clip();
             continue;
+        }
+
+        if (cover_draws_todo > 0) {
+            graphics.remove_clip();
+            draw_jpeg();
+            set_clip();
+            cover_draws_todo--;
         }
 
         int y = (FRAME_HEIGHT + SAMPLE_HEIGHT) / 2;
@@ -109,4 +159,12 @@ void bt_display_set_track_title(char* _title)
 {
     strncpy(title, _title, MAX_TITLE_LEN);
     multicore_fifo_push_blocking(1);
+}
+
+void bt_display_set_cover_art(const uint8_t * cover_data, uint32_t cover_len)
+{
+    printf("Got cover art\n");
+    cover_jpg = cover_data;
+    cover_jpg_len = cover_len;
+    cover_draws_todo = cover_data ? 2 : 0;
 }
