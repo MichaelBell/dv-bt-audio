@@ -927,6 +927,7 @@ static void avrcp_controller_packet_handler(uint8_t packet_type, uint16_t channe
             if (avrcp_subevent_now_playing_artist_info_get_value_len(packet) > 0){
                 memcpy(avrcp_subevent_value, avrcp_subevent_now_playing_artist_info_get_value(packet), avrcp_subevent_now_playing_artist_info_get_value_len(packet));
                 printf("AVRCP Controller: Artist %s\n", avrcp_subevent_value);
+                bt_display_set_track_artist((char*)avrcp_subevent_value);
             }  
             break;
         
@@ -934,6 +935,7 @@ static void avrcp_controller_packet_handler(uint8_t packet_type, uint16_t channe
             if (avrcp_subevent_now_playing_album_info_get_value_len(packet) > 0){
                 memcpy(avrcp_subevent_value, avrcp_subevent_now_playing_album_info_get_value(packet), avrcp_subevent_now_playing_album_info_get_value_len(packet));
                 printf("AVRCP Controller: Album %s\n", avrcp_subevent_value);
+                bt_display_set_track_album((char*)avrcp_subevent_value);
             }  
             break;
         
