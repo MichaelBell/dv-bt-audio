@@ -163,6 +163,11 @@ static void core1_main() {
             continue;
         }
 
+        if (req == 4) {
+            cover_draws_todo = 2;
+            continue;
+        }
+
         if (cover_draws_todo > 0) {
             graphics.set_clip(Rect(ART_X, ART_Y, ART_SIZE, ART_SIZE));
             graphics.set_pen(0,0,50);
@@ -228,5 +233,5 @@ void bt_display_set_cover_art(const uint8_t * cover_data, uint32_t cover_len)
     printf("Got cover art\n");
     cover_jpg = cover_data;
     cover_jpg_len = cover_len;
-    cover_draws_todo = cover_data ? 2 : 0;
+    multicore_fifo_push_blocking(4);
 }
