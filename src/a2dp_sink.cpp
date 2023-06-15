@@ -1105,6 +1105,7 @@ static void a2dp_sink_packet_handler(uint8_t packet_type, uint16_t channel, uint
 
             a2dp_subevent_stream_established_get_bd_addr(packet, a2dp_conn->addr);
             a2dp_conn->a2dp_cid = a2dp_subevent_stream_established_get_a2dp_cid(packet);
+            a2dp_conn->a2dp_local_seid = a2dp_subevent_stream_established_get_local_seid(packet);
             a2dp_conn->stream_state = STREAM_STATE_OPEN;
 
             printf("A2DP  Sink      : Streaming connection is established, address %s, cid 0x%02x, local seid %d\n",
@@ -1223,13 +1224,12 @@ static void stdin_process(char cmd){
     uint8_t volume;
     avrcp_battery_status_t old_battery_status;
 
-    a2dp_sink_demo_stream_endpoint_t *  stream_endpoint  = &a2dp_sink_demo_stream_endpoint;
     a2dp_sink_demo_a2dp_connection_t *  a2dp_connection  = &a2dp_sink_demo_a2dp_connection;
     a2dp_sink_demo_avrcp_connection_t * avrcp_connection = &a2dp_sink_demo_avrcp_connection;
 
     switch (cmd){
         case 'b':
-            status = a2dp_sink_establish_stream(device_addr, stream_endpoint->a2dp_local_seid, &a2dp_connection->a2dp_cid);
+            status = a2dp_sink_establish_stream(device_addr, &a2dp_connection->a2dp_cid);
             printf(" - Create AVDTP connection to addr %s, and local seid %d, cid 0x%02x.\n",
                    bd_addr_to_str(device_addr), a2dp_connection->a2dp_local_seid, a2dp_connection->a2dp_cid);
             break;
