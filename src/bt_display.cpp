@@ -23,6 +23,7 @@ using namespace pimoroni;
 #define NAME_Y 20
 #define ART_X 22
 #define ART_Y 120
+#define ART_SIZE 200
 #define TITLE_X 242
 #define TITLE_Y 370
 #define ALBUM_X 242
@@ -91,26 +92,26 @@ static void init_screen() {
 
 static void set_title() {
     graphics.set_pen(0,0,50);
-    graphics.rectangle(Rect(TITLE_X, TITLE_Y, 400, 20));
+    graphics.rectangle(Rect(TITLE_X, TITLE_Y, 470, 30));
     graphics.set_pen(200,200,200);
     graphics.set_font("bitmap8");
-    graphics.text(title, Point(TITLE_X, TITLE_Y), 400, 2);
+    graphics.text(title, Point(TITLE_X, TITLE_Y), 470, 2);
 }
 
 static void set_artist() {
     graphics.set_pen(0,0,50);
-    graphics.rectangle(Rect(ARTIST_X, ARTIST_Y, 400, 20));
+    graphics.rectangle(Rect(ARTIST_X, ARTIST_Y, 470, 30));
     graphics.set_pen(200,200,200);
     graphics.set_font("bitmap8");
-    graphics.text(artist, Point(ARTIST_X, ARTIST_Y), 400, 2);
+    graphics.text(artist, Point(ARTIST_X, ARTIST_Y), 470, 2);
 }
 
 static void set_album() {
     graphics.set_pen(0,0,50);
-    graphics.rectangle(Rect(ALBUM_X, ALBUM_Y, 400, 20));
+    graphics.rectangle(Rect(ALBUM_X, ALBUM_Y, 470, 30));
     graphics.set_pen(200,200,200);
     graphics.set_font("bitmap8");
-    graphics.text(album, Point(ALBUM_X, ALBUM_Y), 400, 2);
+    graphics.text(album, Point(ALBUM_X, ALBUM_Y), 470, 2);
 }
 
 static void set_clip() {
@@ -163,7 +164,9 @@ static void core1_main() {
         }
 
         if (cover_draws_todo > 0) {
-            graphics.remove_clip();
+            graphics.set_clip(Rect(ART_X, ART_Y, ART_SIZE, ART_SIZE));
+            graphics.set_pen(0,0,50);
+            graphics.clear();
             draw_jpeg();
             set_clip();
             cover_draws_todo--;
