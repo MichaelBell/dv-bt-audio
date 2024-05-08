@@ -1,7 +1,8 @@
 #include "pico/multicore.h"
+#include "pico/flash.h"
 
 #include "drivers/dv_display/dv_display.hpp"
-#include "libraries/pico_graphics/pico_graphics.hpp"
+#include "libraries/pico_graphics/pico_graphics_dv.hpp"
 
 #include "fixed_fft.hpp"
 #include "JPEGDEC.h"
@@ -31,7 +32,7 @@ using namespace pimoroni;
 #define ARTIST_X 242
 #define ARTIST_Y 430
 
-static DVDisplay display(FRAME_WIDTH, FRAME_HEIGHT);
+static DVDisplay display;
 static PicoGraphics_PenDV_RGB555 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
 
 static volatile int16_t sample_buffer[DISPLAY_SAMPLES];
@@ -119,14 +120,17 @@ static void set_clip() {
 }
 
 static void core1_main() {
+    flash_safe_execute_core_init();
+
     printf("Core1 launched\n");
-    display.init();
+    display.init(FRAME_WIDTH, FRAME_HEIGHT, DVDisplay::MODE_RGB555, FRAME_WIDTH, FRAME_HEIGHT);
     multicore_fifo_push_blocking(1);
     init_screen();
     display.flip();
     init_screen();
 
     set_clip();
+    printf("Core1 init\n");
 
     while (true) {
         graphics.set_pen(0);
@@ -136,6 +140,7 @@ static void core1_main() {
         while (req == 0 && multicore_fifo_rvalid()) {
             req = multicore_fifo_pop_blocking();
         }
+        printf("Req %d\n", req);
         if (req == 1) {
             graphics.remove_clip();
             set_title();
@@ -184,12 +189,14 @@ static void core1_main() {
             graphics.rectangle(Rect(x, y - sample_buffer[i], SAMPLE_WIDTH, sample_buffer[i]));
         }
 
+        printf("Flip\n");
         display.flip();
     }
 }
 
 void bt_display_init() {
     printf("Initializing display\n");
+    DVDisplay::preinit();
     fft.set_scale(.25f);
     memset((void*)sample_buffer, 0, sizeof(int16_t) * DISPLAY_SAMPLES);
     memset(title, 0, MAX_STRING_LEN+1);
@@ -233,5 +240,5 @@ void bt_display_set_cover_art(const uint8_t * cover_data, uint32_t cover_len)
     printf("Got cover art\n");
     cover_jpg = cover_data;
     cover_jpg_len = cover_len;
-    multicore_fifo_push_blocking(4);
+    //multicore_fifo_push_blocking(4);
 }

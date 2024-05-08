@@ -13,6 +13,7 @@ set(PICO_BOARD pico_w)
 
 pico_sdk_init()
 
+include(picovision_import.cmake)
 include(bluetooth/bluetooth.cmake)
 
 add_executable(${NAME}
@@ -24,8 +25,6 @@ add_executable(${NAME}
 )
 
 include(common/pimoroni_i2c)
-include(drivers/aps6404/aps6404)
-include(drivers/dv_display/dv_display)
 include(libraries/pico_graphics/pico_graphics)
 include(libraries/jpegdec/jpegdec)
 
@@ -38,8 +37,8 @@ target_link_libraries(${NAME}
     pico_audio_i2s
     pico_multicore
     pimoroni_i2c
-    dv_display
     pico_graphics
+    picovision
     jpegdec
 )
 
@@ -47,6 +46,7 @@ target_compile_definitions(${NAME} PRIVATE
     PICO_AUDIO_I2S_DATA_PIN=26
     PICO_AUDIO_I2S_CLOCK_PIN_BASE=27
     BLUETOOTH_DEVICE_NAME="Pico DV"
+    PICO_MAX_SHARED_IRQ_HANDLERS=8
 )
 
 pico_enable_stdio_usb(${NAME} 1)
